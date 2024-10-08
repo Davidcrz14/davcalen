@@ -6,7 +6,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import 'agenda_page.dart';
 import 'db/database_helper.dart';
-import 'performance_page.dart';
+import 'chat_ia_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -161,7 +161,7 @@ class _DashboardPageState extends State<DashboardPage>
                 mainAxisSpacing: 16,
                 childAspectRatio: 1.5,
               ),
-              itemCount: 12,
+              itemCount: cardData.length, // Cambiamos esto para usar la longitud de cardData
               itemBuilder: (context, index) {
                 return MouseRegion(
                   onEnter: (_) => setState(() => _hoveredIndex = index),
@@ -183,71 +183,63 @@ class _DashboardPageState extends State<DashboardPage>
     );
   }
 
-  Widget _buildCard(int index) {
-    final List<Map<String, dynamic>> cardData = [
-      {
-        'title': 'Agenda',
-        'icon': Icons.calendar_today,
-        'color': const Color(0xFF2D2D2D)
-      },
-      {
-        'title': 'Concentracion',
-        'icon': Icons.timer,
-        'color': const Color(0xFFD7E4C0)
-      },
-      {
-        'title': 'Gestión de rendimiento',
-        'icon': Icons.trending_up,
-        'color': const Color(0xFFE0E0E0),
-        'page': const PerformancePage(),
-      },
-      {
-        'title': 'ChatIA',
-        'icon': Icons.chat_bubble_outline,
-        'color': const Color(0xFFE0E0E0)
-      },
-      {
-        'title': 'Organizador de proyectos',
-        'icon': Icons.assignment,
-        'color': const Color(0xFFE0E0E0)
-      },
-      {
-        'title': 'Notas rápidas',
-        'icon': Icons.note_add,
-        'color': const Color(0xFFE0E0E0)
-      },
-      {
-        'title': 'Recordatorios',
-        'icon': Icons.alarm,
-        'color': const Color(0xFFFFC0CB)
-      },
-      {
-        'title': 'Tareas pendientes',
-        'icon': Icons.check_box,
-        'color': const Color(0xFF2D2D2D)
-      },
-      {
-        'title': 'Hábitos diarios',
-        'icon': Icons.repeat,
-        'color': const Color(0xFFE0E0E0)
-      },
-      {
-        'title': 'Estadísticas',
-        'icon': Icons.bar_chart,
-        'color': const Color(0xFF2D2D2D)
-      },
-      {
-        'title': 'Meditación',
-        'icon': Icons.self_improvement,
-        'color': const Color(0xFFD7E4C0)
-      },
-      {
-        'title': 'Configuración',
-        'icon': Icons.settings,
-        'color': const Color(0xFFE0E0E0)
-      },
-    ];
+  // Movemos cardData fuera de _buildCard para que sea accesible en toda la clase
+  final List<Map<String, dynamic>> cardData = [
+    {
+      'title': 'Agenda',
+      'icon': Icons.calendar_today,
+      'color': const Color(0xFF2D2D2D),
+      'page': const AgendaPage(),
+    },
+    {
+      'title': 'ChatIA',
+      'icon': Icons.chat_bubble_outline,
+      'color': const Color(0xFFE0E0E0),
+      'page': const ChatIAPage(),
+    },
+    {
+      'title': 'Organizador de proyectos',
+      'icon': Icons.assignment,
+      'color': const Color(0xFFE0E0E0)
+    },
+    {
+      'title': 'Notas rápidas',
+      'icon': Icons.note_add,
+      'color': const Color(0xFFE0E0E0)
+    },
+    {
+      'title': 'Recordatorios',
+      'icon': Icons.alarm,
+      'color': const Color(0xFFFFC0CB)
+    },
+    {
+      'title': 'Tareas pendientes',
+      'icon': Icons.check_box,
+      'color': const Color(0xFF2D2D2D)
+    },
+    {
+      'title': 'Hábitos diarios',
+      'icon': Icons.repeat,
+      'color': const Color(0xFFE0E0E0)
+    },
+    {
+      'title': 'Estadísticas',
+      'icon': Icons.bar_chart,
+      'color': const Color(0xFF2D2D2D)
+    },
+    {
+      'title': 'Meditación',
+      'icon': Icons.self_improvement,
+      'color': const Color(0xFFD7E4C0)
+    },
+    {
+      'title': 'Configuración',
+      'icon': Icons.settings,
+      'color': const Color(0xFFE0E0E0)
+    },
+  ];
 
+  Widget _buildCard(int index) {
     final isHovered = _hoveredIndex == index;
 
     return GestureDetector(
@@ -315,7 +307,7 @@ class _DashboardPageState extends State<DashboardPage>
             );
           },
         );
-      case 1: // Podómetro
+      case 1:
         return AnimatedBuilder(
           animation: controller,
           builder: (context, child) {
@@ -329,16 +321,7 @@ class _DashboardPageState extends State<DashboardPage>
             );
           },
         );
-      case 2: // Gestión de rendimiento
-        return AnimatedBuilder(
-          animation: controller,
-          builder: (context, child) {
-            return CustomPaint(
-              size: const Size(30, 30),
-              painter: ChartPainter(controller.value),
-            );
-          },
-        );
+
       case 6: // Recordatorios
         return AnimatedBuilder(
           animation: controller,

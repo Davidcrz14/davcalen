@@ -22,6 +22,10 @@ dependencies:
   provider: ^6.0.0
   flutter_local_notifications: ^14.0.0+1  # Actualizado a la última versión
   fl_chart: ^0.63.0  # Actualizamos a la última versión
+  cupertino_icons: ^1.0.2
+  http: 1.2.2
+  shared_preferences: ^2.0.15
+  google_generative_ai: ^0.2.0  # Añade esta línea
 
 dev_dependencies:
   flutter_test:

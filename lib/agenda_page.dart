@@ -42,7 +42,7 @@ class _AgendaPageState extends State<AgendaPage> with SingleTickerProviderStateM
       requestBadgePermission: true,
       requestSoundPermission: true,
     );
-    final initializationSettings = const InitializationSettings(
+    const initializationSettings = InitializationSettings(
       iOS: initializationSettingsWindows,
     );
     flutterLocalNotificationsPlugin.initialize(initializationSettings);
