@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:davcalen/db/database_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class NotasRapidasPage extends StatefulWidget {
   const NotasRapidasPage({Key? key}) : super(key: key);
@@ -50,19 +51,23 @@ class _NotasRapidasPageState extends State<NotasRapidasPage> {
     final nuevaNota = Nota(
       contenido: '',
       posicion: Offset(
-        random.nextDouble() * (MediaQuery.of(context).size.width - 150),
-        random.nextDouble() * (MediaQuery.of(context).size.height - 150),
+        random.nextDouble() * (MediaQuery.of(context).size.width - 200),
+        random.nextDouble() * (MediaQuery.of(context).size.height - 200),
       ),
-      color: Color.fromRGBO(
-        random.nextInt(256),
-        random.nextInt(256),
-        random.nextInt(256),
-        1,
-      ),
+      color: _getRandomPastelColor(),
     );
     setState(() {
       notas.add(nuevaNota);
     });
+  }
+
+  Color _getRandomPastelColor() {
+    return Color.fromRGBO(
+      200 + random.nextInt(56),
+      200 + random.nextInt(56),
+      200 + random.nextInt(56),
+      1,
+    );
   }
 
   void actualizarPosicionNota(Nota nota, Offset nuevaPosicion) {
@@ -75,28 +80,44 @@ class _NotasRapidasPageState extends State<NotasRapidasPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notas Rápidas', style: TextStyle(color: Colors.black87)),
-        backgroundColor: Colors.white,
+        title: Text('Notas Rápidas',
+            style: GoogleFonts.poppins(
+                fontWeight: FontWeight.bold, color: Colors.white)),
+        backgroundColor: Colors.teal.shade700,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black87),
-      ),
-      body: Container(
-        color: Colors.grey[100],
-        child: Stack(
-          children: notas.map((nota) => NotaDraggable(
-            key: ValueKey(nota.id ?? UniqueKey()),
-            nota: nota,
-            onDelete: () => eliminarNota(nota.id!),
-            onDragEnd: (details) => actualizarPosicionNota(nota, details.offset),
-            onSave: () => guardarNota(nota),
-          )).toList(),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: agregarNota,
-        backgroundColor: Colors.blueGrey[300],
-        child: const Icon(Icons.add),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.teal.shade700, Colors.teal.shade100],
+          ),
+        ),
+        child: Stack(
+          children: notas
+              .map((nota) => NotaDraggable(
+                    key: ValueKey(nota.id ?? UniqueKey()),
+                    nota: nota,
+                    onDelete: () => eliminarNota(nota.id!),
+                    onDragEnd: (details) =>
+                        actualizarPosicionNota(nota, details.offset),
+                    onSave: () => guardarNota(nota),
+                  ))
+              .toList(),
+        ),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: agregarNota,
+        backgroundColor: Colors.teal.shade800,
+        icon: const Icon(Icons.add),
+        label: Text('Nueva Nota', style: GoogleFonts.roboto()),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
@@ -223,57 +244,83 @@ class NotaWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 150,
-      height: 150,
+      width: 200,
+      height: 200,
       decoration: BoxDecoration(
         color: nota.color,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 3,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 5,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Stack(
         children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 30,
+              decoration: BoxDecoration(
+                color: nota.color.darken(0.1),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(15),
+                  topRight: Radius.circular(15),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  if (isEditing)
+                    IconButton(
+                      icon: const Icon(Icons.save,
+                          color: Colors.black54, size: 18),
+                      onPressed: onSave,
+                    ),
+                  IconButton(
+                    icon: const Icon(Icons.close,
+                        color: Colors.black54, size: 18),
+                    onPressed: onDelete,
+                  ),
+                ],
+              ),
+            ),
+          ),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.fromLTRB(8, 38, 8, 8),
             child: isEditing
                 ? TextField(
                     maxLines: null,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       border: InputBorder.none,
                       hintText: 'Escribe tu nota aquí...',
+                      hintStyle: GoogleFonts.roboto(color: Colors.black54),
                     ),
-                    style: const TextStyle(color: Colors.black87, fontSize: 14),
+                    style:
+                        GoogleFonts.roboto(color: Colors.black87, fontSize: 14),
                     controller: controller,
                   )
                 : Text(
                     nota.contenido,
-                    style: const TextStyle(color: Colors.black87, fontSize: 14),
+                    style:
+                        GoogleFonts.roboto(color: Colors.black87, fontSize: 14),
                   ),
-          ),
-          Positioned(
-            top: 0,
-            right: 0,
-            child: Row(
-              children: [
-                if (isEditing)
-                  IconButton(
-                    icon: const Icon(Icons.save, color: Colors.black54, size: 18),
-                    onPressed: onSave,
-                  ),
-                IconButton(
-                  icon: const Icon(Icons.close, color: Colors.black54, size: 18),
-                  onPressed: onDelete,
-                ),
-              ],
-            ),
           ),
         ],
       ),
     );
+  }
+}
+
+extension ColorExtension on Color {
+  Color darken([double amount = 0.1]) {
+    assert(amount >= 0 && amount <= 1);
+    final hsl = HSLColor.fromColor(this);
+    final hslDark = hsl.withLightness((hsl.lightness - amount).clamp(0.0, 1.0));
+    return hslDark.toColor();
   }
 }
