@@ -3,6 +3,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'db/database_helper.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AgendaPage extends StatefulWidget {
   const AgendaPage({super.key});
@@ -58,31 +59,42 @@ class _AgendaPageState extends State<AgendaPage> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Agenda'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
+        title: Text('Agenda', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: Colors.white)),
+        backgroundColor: Colors.teal.shade700,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: FadeTransition(
-        opacity: _animation,
-        child: Column(
-          children: [
-            _buildCalendar(),
-            Expanded(child: _buildReminderList()),
-          ],
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.teal.shade700, Colors.teal.shade100],
+          ),
+        ),
+        child: FadeTransition(
+          opacity: _animation,
+          child: Column(
+            children: [
+              _buildCalendar(),
+              Expanded(child: _buildReminderList()),
+            ],
+          ),
         ),
       ),
       floatingActionButton: ScaleTransition(
         scale: _animation,
-        child: FloatingActionButton(
+        child: FloatingActionButton.extended(
           onPressed: () => _showAddReminderDialog(_selectedDay ?? _focusedDay),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          child: const Icon(Icons.add),
+          backgroundColor: Colors.teal.shade800,
+          icon: const Icon(Icons.add),
+          label: const Text('Nuevo Recordatorio'),
         ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
@@ -93,7 +105,7 @@ class _AgendaPageState extends State<AgendaPage> with SingleTickerProviderStateM
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
+            color: Colors.black.withOpacity(0.1),
             spreadRadius: 2,
             blurRadius: 5,
             offset: const Offset(0, 3),
@@ -127,20 +139,20 @@ class _AgendaPageState extends State<AgendaPage> with SingleTickerProviderStateM
         locale: 'es_ES',
         calendarStyle: CalendarStyle(
           todayDecoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+            color: Colors.teal.shade300,
             shape: BoxShape.circle,
           ),
           selectedDecoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary,
+            color: Colors.teal.shade700,
             shape: BoxShape.circle,
           ),
-          weekendTextStyle: const TextStyle(color: Colors.red),
+          weekendTextStyle: TextStyle(color: Colors.teal.shade800),
           outsideTextStyle: const TextStyle(color: Colors.grey),
         ),
-        headerStyle: const HeaderStyle(
+        headerStyle: HeaderStyle(
           formatButtonVisible: false,
           titleCentered: true,
-          titleTextStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          titleTextStyle: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.teal.shade700),
         ),
       ),
     );
@@ -173,14 +185,15 @@ class _AgendaPageState extends State<AgendaPage> with SingleTickerProviderStateM
                   ),
                 )),
                 child: Card(
-                  elevation: 2,
+                  elevation: 4,
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   child: ListTile(
                     title: Text(reminder['title'],
-                        style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text('${reminder['description']} - ${reminder['time']}'),
-                    leading: Icon(Icons.event,
-                        color: Theme.of(context).colorScheme.primary),
+                        style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: Colors.teal.shade700)),
+                    subtitle: Text('${reminder['description']} - ${reminder['time']}',
+                        style: GoogleFonts.roboto(color: Colors.grey.shade600)),
+                    leading: Icon(Icons.event, color: Colors.teal.shade500),
                     onTap: () => _showReminderDetailsDialog(reminder),
                   ),
                 ),
@@ -235,23 +248,25 @@ class _AgendaPageState extends State<AgendaPage> with SingleTickerProviderStateM
         TimeOfDay time = TimeOfDay.now();
 
         return AlertDialog(
-          title: const Text('Añadir recordatorio'),
+          title: Text('Añadir recordatorio', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: Colors.teal.shade700)),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Título',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.teal.shade700)),
                   ),
                   onChanged: (value) => title = value,
                 ),
                 const SizedBox(height: 16),
                 TextField(
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Descripción',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.teal.shade700)),
                   ),
                   maxLines: 3,
                   onChanged: (value) => description = value,
@@ -260,6 +275,10 @@ class _AgendaPageState extends State<AgendaPage> with SingleTickerProviderStateM
                 ElevatedButton.icon(
                   icon: const Icon(Icons.access_time),
                   label: const Text('Seleccionar hora'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal.shade700, // Cambiado de 'primary' a 'backgroundColor'
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
                   onPressed: () async {
                     final selectedTime = await showTimePicker(
                       context: context,
@@ -275,11 +294,15 @@ class _AgendaPageState extends State<AgendaPage> with SingleTickerProviderStateM
           ),
           actions: [
             TextButton(
-              child: const Text('Cancelar'),
+              child: Text('Cancelar', style: GoogleFonts.roboto(color: Colors.grey.shade600)),
               onPressed: () => Navigator.of(context).pop(),
             ),
             ElevatedButton(
-              child: const Text('Guardar'),
+              child: Text('Guardar', style: GoogleFonts.roboto(color: Colors.white)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.teal.shade700, // Cambiado de 'primary' a 'backgroundColor'
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
               onPressed: () {
                 if (title.isNotEmpty) {
                   final reminderDateTime = DateTime(

@@ -16,10 +16,10 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDatabase() async {
-    String path = join(await getDatabasesPath(), 'reminders.db');
+    String path = join(await getDatabasesPath(), 'app_database.db');
     return await openDatabase(
       path,
-      version: 1,
+      version: 3,
       onCreate: (Database db, int version) async {
         await db.execute('''
           CREATE TABLE reminders(
@@ -30,6 +30,60 @@ class DatabaseHelper {
             time TEXT
           )
         ''');
+        await db.execute('''
+          CREATE TABLE chat_messages(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            role TEXT,
+            content TEXT,
+            timestamp INTEGER
+          )
+        ''');
+        await db.execute('''
+          CREATE TABLE projects(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT,
+            description TEXT,
+            status TEXT,
+            dueDate TEXT,
+            createdAt INTEGER
+          )
+        ''');
+        await db.execute('''
+          CREATE TABLE tasks(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            projectId INTEGER,
+            title TEXT,
+            description TEXT,
+            status TEXT,
+            dueDate TEXT,
+            FOREIGN KEY (projectId) REFERENCES projects(id)
+          )
+        ''');
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 3) {
+          await db.execute('''
+            CREATE TABLE projects(
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              title TEXT,
+              description TEXT,
+              status TEXT,
+              dueDate TEXT,
+              createdAt INTEGER
+            )
+          ''');
+          await db.execute('''
+            CREATE TABLE tasks(
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              projectId INTEGER,
+              title TEXT,
+              description TEXT,
+              status TEXT,
+              dueDate TEXT,
+              FOREIGN KEY (projectId) REFERENCES projects(id)
+            )
+          ''');
+        }
       },
     );
   }
@@ -51,5 +105,74 @@ class DatabaseHelper {
       where: 'id = ?',
       whereArgs: [id],
     );
+  }
+
+  // Nuevos métodos para chat_messages
+  Future<int> insertChatMessage(Map<String, dynamic> message) async {
+    final db = await database;
+    return await db.insert('chat_messages', message);
+  }
+
+  Future<List<Map<String, dynamic>>> getChatMessages() async {
+    final db = await database;
+    return await db.query('chat_messages', orderBy: 'timestamp ASC');
+  }
+
+  Future<int> deleteAllChatMessages() async {
+    final db = await database;
+    return await db.delete('chat_messages');
+  }
+
+  // Métodos para proyectos
+  Future<int> insertProject(Map<String, dynamic> project) async {
+    final db = await database;
+    return await db.insert('projects', project);
+  }
+
+  Future<List<Map<String, dynamic>>> getProjects() async {
+    final db = await database;
+    return await db.query('projects', orderBy: 'createdAt DESC');
+  }
+
+  Future<int> updateProject(Map<String, dynamic> project) async {
+    final db = await database;
+    return await db.update(
+      'projects',
+      project,
+      where: 'id = ?',
+      whereArgs: [project['id']],
+    );
+  }
+
+  Future<int> deleteProject(int id) async {
+    final db = await database;
+    await db.delete('tasks', where: 'projectId = ?', whereArgs: [id]);
+    return await db.delete('projects', where: 'id = ?', whereArgs: [id]);
+  }
+
+  // Métodos para tareas
+  Future<int> insertTask(Map<String, dynamic> task) async {
+    final db = await database;
+    return await db.insert('tasks', task);
+  }
+
+  Future<List<Map<String, dynamic>>> getTasksForProject(int projectId) async {
+    final db = await database;
+    return await db.query('tasks', where: 'projectId = ?', whereArgs: [projectId]);
+  }
+
+  Future<int> updateTask(Map<String, dynamic> task) async {
+    final db = await database;
+    return await db.update(
+      'tasks',
+      task,
+      where: 'id = ?',
+      whereArgs: [task['id']],
+    );
+  }
+
+  Future<int> deleteTask(int id) async {
+    final db = await database;
+    return await db.delete('tasks', where: 'id = ?', whereArgs: [id]);
   }
 }

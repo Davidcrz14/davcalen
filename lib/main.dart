@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -5,14 +6,29 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import 'agenda_page.dart';
-import 'db/database_helper.dart';
 import 'chat_ia_page.dart';
+import 'db/database_helper.dart';
+import 'project_organizer_page.dart';
 
 void main() async {
+  // Asegúrate de que los widgets de Flutter estén inicializados
   WidgetsFlutterBinding.ensureInitialized();
-  sqfliteFfiInit();
-  databaseFactory = databaseFactoryFfi;
-  await DatabaseHelper().database; // Inicializa la base de datos
+
+  // Inicializa sqflite_ffi
+  if (Platform.isWindows || Platform.isLinux) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  }
+
+  // Inicializa la base de datos
+  try {
+    await DatabaseHelper().database;
+    print('Base de datos inicializada correctamente');
+  } catch (e) {
+    print('Error al inicializar la base de datos: $e');
+  }
+
+  // Ejecuta la aplicación
   runApp(const MyApp());
 }
 
@@ -161,7 +177,8 @@ class _DashboardPageState extends State<DashboardPage>
                 mainAxisSpacing: 16,
                 childAspectRatio: 1.5,
               ),
-              itemCount: cardData.length, // Cambiamos esto para usar la longitud de cardData
+              itemCount: cardData
+                  .length, // Cambiamos esto para usar la longitud de cardData
               itemBuilder: (context, index) {
                 return MouseRegion(
                   onEnter: (_) => setState(() => _hoveredIndex = index),
@@ -200,7 +217,13 @@ class _DashboardPageState extends State<DashboardPage>
     {
       'title': 'Organizador de proyectos',
       'icon': Icons.assignment,
-      'color': const Color(0xFFE0E0E0)
+      'color': const Color(0xFFE0E0E0),
+      'page': ProjectOrganizerPage(
+        databaseHelper: DatabaseHelper(),
+        onProjectUpdated: () {
+          // Aquí puedes añadir lógica para actualizar la UI si es necesario
+        },
+      ),
     },
     {
       'title': 'Notas rápidas',
