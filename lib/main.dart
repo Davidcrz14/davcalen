@@ -9,6 +9,7 @@ import 'agenda_page.dart';
 import 'chat_ia_page.dart';
 import 'db/database_helper.dart';
 import 'project_organizer_page.dart';
+import 'notas_rapidas_page.dart';
 
 void main() async {
   // Asegúrate de que los widgets de Flutter estén inicializados
@@ -228,7 +229,8 @@ class _DashboardPageState extends State<DashboardPage>
     {
       'title': 'Notas rápidas',
       'icon': Icons.note_add,
-      'color': const Color(0xFFE0E0E0)
+      'color': const Color(0xFFE0E0E0),
+      'page': const NotasRapidasPage(),
     },
     {
       'title': 'Recordatorios',

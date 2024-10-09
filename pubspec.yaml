@@ -24,7 +24,7 @@ dependencies:
   fl_chart: ^0.63.0
   cupertino_icons: ^1.0.2
   http: ^0.13.3
-  shared_preferences: ^2.0.8
+  shared_preferences: ^2.0.15
   animated_text_kit: ^4.2.1  # Añadimos solo esta línea para las animaciones de texto
   flutter_slidable: ^3.0.0  # Actualiza a la última versión
   google_fonts: ^4.0.4

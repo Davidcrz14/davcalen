@@ -1,5 +1,5 @@
-import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -19,7 +19,7 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'app_database.db');
     return await openDatabase(
       path,
-      version: 3,
+      version: 4, // Incrementamos la versión
       onCreate: (Database db, int version) async {
         await db.execute('''
           CREATE TABLE reminders(
@@ -48,6 +48,7 @@ class DatabaseHelper {
             createdAt INTEGER
           )
         ''');
+        
         await db.execute('''
           CREATE TABLE tasks(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -59,28 +60,27 @@ class DatabaseHelper {
             FOREIGN KEY (projectId) REFERENCES projects(id)
           )
         ''');
+        await db.execute('''
+          CREATE TABLE quick_notes(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            content TEXT,
+            color INTEGER,
+            positionX REAL,
+            positionY REAL,
+            createdAt INTEGER
+          )
+        ''');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
-        if (oldVersion < 3) {
+        if (oldVersion < 4) {
           await db.execute('''
-            CREATE TABLE projects(
+            CREATE TABLE quick_notes(
               id INTEGER PRIMARY KEY AUTOINCREMENT,
-              title TEXT,
-              description TEXT,
-              status TEXT,
-              dueDate TEXT,
+              content TEXT,
+              color INTEGER,
+              positionX REAL,
+              positionY REAL,
               createdAt INTEGER
-            )
-          ''');
-          await db.execute('''
-            CREATE TABLE tasks(
-              id INTEGER PRIMARY KEY AUTOINCREMENT,
-              projectId INTEGER,
-              title TEXT,
-              description TEXT,
-              status TEXT,
-              dueDate TEXT,
-              FOREIGN KEY (projectId) REFERENCES projects(id)
             )
           ''');
         }
@@ -158,7 +158,8 @@ class DatabaseHelper {
 
   Future<List<Map<String, dynamic>>> getTasksForProject(int projectId) async {
     final db = await database;
-    return await db.query('tasks', where: 'projectId = ?', whereArgs: [projectId]);
+    return await db
+        .query('tasks', where: 'projectId = ?', whereArgs: [projectId]);
   }
 
   Future<int> updateTask(Map<String, dynamic> task) async {
@@ -174,5 +175,31 @@ class DatabaseHelper {
   Future<int> deleteTask(int id) async {
     final db = await database;
     return await db.delete('tasks', where: 'id = ?', whereArgs: [id]);
+  }
+
+  // Métodos para notas rápidas
+  Future<int> insertQuickNote(Map<String, dynamic> note) async {
+    final db = await database;
+    return await db.insert('quick_notes', note);
+  }
+
+  Future<List<Map<String, dynamic>>> getQuickNotes() async {
+    final db = await database;
+    return await db.query('quick_notes', orderBy: 'createdAt DESC');
+  }
+
+  Future<int> updateQuickNote(Map<String, dynamic> note) async {
+    final db = await database;
+    return await db.update(
+      'quick_notes',
+      note,
+      where: 'id = ?',
+      whereArgs: [note['id']],
+    );
+  }
+
+  Future<int> deleteQuickNote(int id) async {
+    final db = await database;
+    return await db.delete('quick_notes', where: 'id = ?', whereArgs: [id]);
   }
 }
